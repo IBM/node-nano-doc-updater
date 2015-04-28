@@ -166,7 +166,7 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 		function (err/*, r*/) {
 			// If someone beat us here, we need to try the whole thing again.
 			if (err && err.error === "conflict")
-				return updateDocument(null, newDoc, newDoc, db, f_ShouldUpdate, f_Merge, callback);
+				return updateDocument(null, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback);
 
 			// If anything else happened, bail.
 			if (err)
