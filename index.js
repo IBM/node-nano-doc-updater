@@ -1,3 +1,11 @@
+/**
+ * Licensed Materials - Property of IBM
+ * (c) Copyright IBM Corporation 2015, 2015. All Rights Reserved.
+ *
+ * Note to U.S. Government Users Restricted Rights:
+ * Use, duplication or disclosure restricted by GSA ADP Schedule
+ * Contract with IBM Corp.
+ */
 "use strict";
 
 /*
@@ -5,7 +13,7 @@
  * with the provided ID already exists, optionally runs user defined
  * functions for either skipping an update (based on the existing document)
  * or merging.
- * 
+ *
  */
 
 module.exports = function () {
@@ -32,13 +40,13 @@ function NanoDocUpdater () {
 
 	NanoDocUpdater.prototype.update = function (callback) {
 		updateDocument(
-			this._existingDoc, 
-			this._newDoc, 
+			this._existingDoc,
+			this._newDoc,
 			this._id,
-			this._db, 
-			this._shouldUpdate, 
+			this._db,
+			this._shouldUpdate,
 			this._shouldCreate,
-			this._merge, 
+			this._merge,
 			callback
 		);
 	};
@@ -54,13 +62,13 @@ function NanoDocUpdater () {
 
 		return function (callback) {
 			updateDocument(
-				existingDoc, 
-				newDoc, 
+				existingDoc,
+				newDoc,
 				id,
-				db, 
-				shouldUpdate, 
+				db,
+				shouldUpdate,
 				shouldCreate,
-				merge, 
+				merge,
 				callback
 			);
 		};
@@ -98,7 +106,7 @@ function omit(source, blacklist) {
 	return result;
 }
 
-/* Create-or-update a document: First fetch the existing revision, then 
+/* Create-or-update a document: First fetch the existing revision, then
    insert a new one.  Optional f_ShouldUpdate and f_Merge functions
    control the specifics of merging. */
 function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback) {
