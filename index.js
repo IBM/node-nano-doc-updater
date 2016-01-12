@@ -171,7 +171,7 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 	db.insert(
 		mergedDoc,
 		id,
-		function (err/*, r*/) {
+		function (err, result) {
 			// If someone beat us here, we need to try the whole thing again.
 			if (err && err.error === "conflict")
 				return updateDocument(null, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback);
@@ -179,6 +179,9 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 			// If anything else happened, bail.
 			if (err)
 				return callback("Could not update the document to the proposed version: " + err.toString());
+
+			// Update the new document's _rev
+			mergedDoc._rev = result.rev;
 
 			// The replacement worked.  We're done.  Finally!
 			return callback(null, mergedDoc);
