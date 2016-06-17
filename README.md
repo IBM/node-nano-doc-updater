@@ -1,11 +1,5 @@
-NAME
-----
-
-nano-doc-updater - Updates couchdb documents with configurable conflict resolution
-
-
-DESCRIPTION
------------
+# IBM Bluemix DevOps Services - node-nano-doc-updater
+This module is designed to allow updates of CouchDB documents with configurable conflict resolution.
 
 Because of the way CoucbDB handles concurrency, updating a document is non-trivial.
 Instead of asking CouchDB to kindly serialize the updates, the process is:
@@ -25,9 +19,23 @@ flow.  Using it involves priming it with information and then asking it
 perform one or more updates.  The primed information includes the following
 paramters.
 
+Link to [Bluemix Public IDS Experiment](https://new-console.ng.bluemix.net/dashboard/devops).
 
-PARAMETERS
-----------
+This is one of hundreds of [IBM Open Source projects at GitHub](http://ibm.github.io).
+
+# License
+
+[The MIT License (MIT)](LICENSE.txt)
+
+# Contributing
+
+Contributions are welcome via Pull Requests. Please submit your very first Pull Request against the [Developer's Certificate of Origin](DCO.txt), adding a line like the following to the end of the file... using your name and email address of course!
+
+Signed-off-by: John Doe <john.doe@example.org>
+
+# API
+
+##PARAMETERS
 
 Note that parameters are specified by running setter functions.  Each setter returns the nano-doc-updater, so these calls may be chained.
 
@@ -40,8 +48,7 @@ Note that parameters are specified by running setter functions.  Each setter ret
 - `.merge(function (publishedVer, newDoc) { ... })` - Where the function provided to shouldUpdate() returns the affirmative, this function is run against the published and new versions of the document.  This should return a merged version of the two documents.  If this function is not provided, the document provided to newDoc() will be used verbatim.  NOTE: That the _rev of the published revision will always be applied to the document inserted, after the merge.  NOTE ALSO: That if this function returns a non-object, or an Error, no insert will occur.  Instead, update() will fail with the returned value.  This behavior can be useful for detecting and handling unrecoverable merge conflicts.
 
 
-ACTIONS
--------
+##ACTIONS
 
 After priming a nano-doc-updater with the functions above, to have it actually perform an update, call `.update(function (err) {})`.  This is a standard async function that will return on error or after the updating has finally completed.
 
@@ -50,8 +57,7 @@ To get a function that can be run later to perform the primed update, run `.upda
 Both of these function `.update()` and the async function returned by `.updateJob()` will return either an error or the published revision of the indicated document.
 
 
-USAGE
------
+# USAGE
 
 	var updater = require("nano-doc-updater");
 	var db = require("nano")("https://mydatabase.com").use("mydatabase");
@@ -199,16 +205,3 @@ USAGE
 	], function (err, r) {
 		console.log("All done");
 	});
-
-
-BUGS
-----
-
-- This doc's a bit terse.  Also, I haven't actually tested the example :-)
-- This module is only sorta useful where documents are being accessed from a view.  In these situations, the user would have to look up the document from outside of this module, then ask this module to update the document.
-
-
-AUTHOR
-------
-
-Chris Taylor <cntaylor@ca.ibm.com>
