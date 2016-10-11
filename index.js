@@ -138,7 +138,7 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 						return callback("Could not fetch existing document: " + err.toString());
 
 					// The insert worked.  We're done.
-					return callback(null, extend({_rev: r.rev}, newDoc));
+					return callback(null, extend(newDoc, {_rev: r.rev}));
 				});
 			}
 
@@ -165,7 +165,7 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 
 	// It's essential that we specify a revision or this will never terminate.
 	// It's probably not a good idea to trust a user-specified merge function to do this.
-	mergedDoc = extend({ _rev: existingDoc._rev }, mergedDoc);
+	mergedDoc = extend(mergedDoc, { _rev: existingDoc._rev });
 
 	// The document exists, and is out of date.  We need to overwrite it.
 	db.insert(
