@@ -1,14 +1,25 @@
 {
-    "name": "nano-doc-updater",
-    "version": "0.0.2",
-    "description": "Performs insert-updates of a couchdb document with configurable conflict resolution.",
-    "author": "Chris Taylor <cntaylor@ca.ibm.com>",
-    "license": "MIT",
-    "keywords": [ "nano", "update", "insert", "merge" ],
-    "repository": {
-	"type": "git",
-	"url": "https://github.com/IBM/node-nano-doc-updater"
-    },
-    "main": "index.js",
-    "homepage": "https://github.com/IBM/node-nano-doc-updater/releases"
+  "name": "nano-doc-updater",
+  "version": "0.0.2",
+  "description": "Performs insert-updates of a couchdb document with configurable conflict resolution.",
+  "author": "Chris Taylor <cntaylor@ca.ibm.com>",
+  "license": "MIT",
+  "keywords": [
+    "nano",
+    "update",
+    "insert",
+    "merge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IBM/node-nano-doc-updater"
+  },
+  "main": "index.js",
+  "homepage": "https://github.com/IBM/node-nano-doc-updater/releases",
+  "devDependencies": {
+    "nano": "^6.2.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.2",
+    "tape-catch": "^1.0.6"
+  }
 }
