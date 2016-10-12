@@ -1,5 +1,5 @@
 var test = require("tape-catch"),
-    extend = require("../lib/extend");
+    extend = require("../../lib/extend");
 
 test("extending an empty object with a single empty object...", function (t) {
     var o1 = {};
