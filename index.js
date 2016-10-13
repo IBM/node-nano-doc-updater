@@ -16,7 +16,8 @@
  *
  */
 
-var extend = require("./lib/extend");
+var extend = require("./lib/extend"),
+    omit = require("./lib/omit");
 
 module.exports = function () {
 	return new NanoDocUpdater();
@@ -89,17 +90,6 @@ function useNewVersion(existing, newVer) {
 	return newVer;
 }
 
-
-function omit(source, blacklist) {
-	var result = {};
-
-	Object.getOwnPropertyNames(source).forEach(function (e) {
-		if (blacklist.indexOf(e) === -1)
-			result[e] = source[e];
-	});
-
-	return result;
-}
 
 /* Create-or-update a document: First fetch the existing revision, then
    insert a new one.  Optional f_ShouldUpdate and f_Merge functions
