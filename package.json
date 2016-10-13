@@ -23,6 +23,7 @@
     "tape-catch": "^1.0.6"
   },
   "scripts": {
-    "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-spec"
+    "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-spec",
+    "test-debug": "node --inspect --debug-brk node_modules/.bin/tape test/*/*.js"
   }
 }
