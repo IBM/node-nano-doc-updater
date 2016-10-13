@@ -7,3 +7,6 @@ services:
     - couchdb
 env:
     - DB=http://localhost:5984
+script:
+    - npm test
+    - node_modules/.bin/eslint .
