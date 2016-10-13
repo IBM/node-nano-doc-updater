@@ -1,6 +1,5 @@
 var test = require("tape-catch"),
     Promise = require("bluebird"),
-    nanoDocUpdater = require("../../"),
     resetTestDb = require("./lib/reset-test-db");
 
 test("sanity - after wiping the DB...", (t) => {
