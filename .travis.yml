@@ -9,4 +9,4 @@ env:
     - DB=http://localhost:5984
 script:
     - npm test
-    - eslint .
+    - node_modules/.bin/eslint .
