@@ -17,6 +17,7 @@
   "main": "index.js",
   "homepage": "https://github.com/IBM/node-nano-doc-updater/releases",
   "devDependencies": {
+    "async": "^2.1.2",
     "eslint": "^3.7.1",
     "nano": "^6.2.0",
     "tap-spec": "^4.1.1",

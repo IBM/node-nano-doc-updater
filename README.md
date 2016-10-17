@@ -201,7 +201,7 @@ async.series([
         version: 1
     })
     .shouldUpdate((existing, newDoc) => {
-        return !existing.version || existing.version < newVer.version;
+        return !existing.version || existing.version < newDoc.version;
     })
     .updateJob(),
     
