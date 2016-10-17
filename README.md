@@ -87,114 +87,131 @@ Returns a function that can be used to perform an update at a later time.  This 
 
 ## Examples
 
+Loading the module and binding it to to a database handle:
+
 ```
 var updater = require("nano-doc-updater");
 var db = require("nano")("https://mydatabase.com").use("mydatabase");
+updater.db(db);
+...
+...
+```
 
-/* Update a design document */
+Updating a design document:
+
+```
+var designDocument = {
+    language: "javascript",
+    version: 1
+};
+
 updater
-.db(db)
-.existingDoc(null) // If you happened to already fetch the current revision, provide it here.  Otherwise it will be fetched first.
-.newDoc({
-	language: "javascript",
-	version: 1
-})
+.newDoc(designDocument)
 .id("_design/foo")
 .shouldUpdate(function (existing, newVer) {
-	/* For a versioned design document, there are some times where
-	   in the face of an existing document, we don't want to update. 
-	   Namely, when the published version is at or above the level
-	   we were about to publish. */
+	/* Only publish a new document when it's below the version
+	   required by this app */
 	return !existing.version || existing.version < newVer.version;
 })
-.merge(function (existing, newVer) {
-	return newVer; 
-	// to ensure this process eventually terminates, 
-	// nano-doc-updater will bump the _rev for us.
+.merge(function (existing, newDoc) {
+	return newDoc; 
+	/* To ensure this process will eventually terminate, 
+	   nano-doc-updater will copy `_rev` from the 
+       existing document to the newDoc one, just before
+       publishing it to CouchDB. */
 })
 .update(function (err) {
-	if (err)
-		process.exit(1);
-
-	/* Reuse the same updater to perform another design update. */
-	updater
-	.newDoc({
-		language: "javascript",
-		version: 2,
-		_views: {
-			count: {
-				map: function (d) {
-					emit(null, 1);
-				},
-				reduce: function (k, v, r) {
-					sum(v);
-				}
-			}
-		}
-	})
-	.update(function (err) {
-		/* Reuse the same updater to update some other unrelated doc with that design above. */
-		updater
-		.id("foo")
-		.shouldUpdate(null) // the default: always try to update
-		.merge(null) 	    // the default: overwrite the existing document
-		.update(function (err) {
-			if (err)
-				process.exit(1);
-
-			/* Delete that document. */
-			updater
-			.shouldCreate(false)
-			.merge(function (published) {
-				var r = {};
-				Object.getOwnPropertyNames(published).forEach(function (p) {
-					r[p] = published[p];
-				});
-				return r;
-			})
-			.update(function (err) {
-				if (err)
-					process.exit(1);
-
-				console.log("All done!");
-			});
-		})
-	});
+    // handle errors
 });
+```
 
-/* Or use Async for flow control and avoid all those indents. */
+Performing another update with the same updater:
+
+```
+var newerDesignDocument = {
+    language: "javascript",
+    version: 2,
+    views: {
+        count: {
+            map: function (d) {
+                emit(null, 1);
+            },
+            reduce: function (k, v, r) {
+                sum(v);
+            }
+        }
+    }
+};
+
+/*
+ * shouldUpdate() is unchanged, so updates will still only
+ * occur if the published version is below 2.
+ */
+updater
+.newDoc(newerDesignDocument)
+.update((err) => {
+    // handle errors
+})
+;
+```
+
+Publish that design document to another document, `foo`:
+
+```
+updater
+.id("foo")
+.shouldUpdate(null) // always update
+.merge(null) // overwrite
+.update((err) => {
+    // handle errors
+});
+```
+
+Delete that new document:
+
+```
+updater
+.merge((existing) => {
+    existing._deleted = true;
+    return existing;
+})
+.update((err) => {
+    // handle errors
+});
+```
+
+Delete that design document from way back:
+
+```
+updater.id("_design/foo").update((err) => {
+    // handle errors
+});
+```
+
+Use `async` to sequence the flow above:
+
+```
 var async = require("async");
 
 async.series([
-	/* JOB1: Update or create a design document. */
-	updater
-	.db(db)
-	.existingDoc(null)
-	.newDoc({
-		language: "javascript",
-		version: 1
-	})
-	.id("_design/foo")
-	.shouldUpdate(function (existing, newVer) {
-		return !existing.version || existing.version < newVer.version;
-	})
-	.merge(function (existing, newVer) {
-		var clone = {};
-		Object.getOwnProperyNames(newVer).forEach(function (p) {
-			clone[p] = newVer[p];
-		});
-		clone._rev = existing._rev;
-
-		# This is actually the default behavior :-)
-	})
-	.updateJob(),
-
-	/* JOB2: Update the same design document again. */
-	updater
-	.newDoc({
+    // Add a design document.  Only publish this if the in-db version is
+    // lower.
+    updater.db(db).id("_design/foo").newDoc({
+        language: "javascript",
+        version: 1
+    })
+    .shouldUpdate((existing, newDoc) => {
+        return !existing.version || existing.version < newDoc.version;
+    })
+    .updateJob(),
+    
+    
+    // Update the design document with an even newer version,
+    // but, again, only if it's out of date.
+    updater.db(db).id("_design/foo").newDoc({
 		language: "javascript",
 		version: 2,
-		_views: {
+		views: {
 			count: {
 				map: function (d) {
 					emit(null, 1);
@@ -204,33 +221,30 @@ async.series([
 				}
 			}
 		}
-	})
-	.updateJob(),
-
-	/* JOB3: Update or create some other document in the same db. */
-	updater
-	.id("foo")
-	.shouldUpdate(null) // use default: always replace existing doc.
-	.merge(null) // use default: no fancy merge.  just bump the _rev and insert.
-	.updateJob(),
-
-	/* JOB4: Delete the document we just created. */
-	updater
-	.shouldCreate(false)
-	.merge(function (published) {
-		var r = {};
-		Object.getOwnPropertyNames(published).forEach(function (p) {
-			r[p] = published[p];
-		});
-
-		r._deleted = true;
-		return r;
-	}).updateJob()
-
-	// The DB will behave as though the document doesn't exist, so recreating
-	// would be a matter of running JOB3 again.
-], function (err, r) {
-	console.log("All done");
+    })
+    .updateJob(),
+    
+    
+    // Place that same document somewhere else in the db:
+    updater.shouldUpdate(null).merge(null).id("foo").updateJob(),
+    
+    // Delete that document:
+    updater
+    .merge((existing) => {
+      existing._deleted = true;
+      return existing;
+    })
+    .updateJob(),
+    
+    // Delete the design document:
+    updater
+    .id("_design/foo")
+    .updateJob()
+], (err) => {
+    if (err) {
+        // handle errors in any of the above.
+    }
+    console.log("All done");
 });
 ```
 
