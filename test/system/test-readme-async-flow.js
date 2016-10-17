@@ -6,8 +6,6 @@ var test = require("tape-catch"),
 
 test("after running through the 'async' flow from the README...", (t) => {
     var db = null;
-    var docId = "a";
-    var doc = { a: 1 };
     var designDocId = "_design/foo";
     var arbitraryDocId = "foo";
 
