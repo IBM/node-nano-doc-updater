@@ -51,7 +51,7 @@ function NanoDocUpdater () {
             this._shouldCreate,
             this._merge,
             callback
-        ;
+        );
     };
 
     NanoDocUpdater.prototype.updateJob = function () {
