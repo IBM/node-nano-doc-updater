@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/IBM/node-nano-doc-updater.svg?branch=master)](https://travis-ci.org/IBM/node-nano-doc-updater)
 
-# IBM Bluemix DevOps Services - node-nano-doc-updater
+# IBM Cloud DevOps Services - node-nano-doc-updater
 
 For more information on IBM Bluemix DevOps Services, see the [Bluemix Public IDS Experiment](https://new-console.ng.bluemix.net/dashboard/devops).
 
