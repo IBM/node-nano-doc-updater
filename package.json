@@ -1,6 +1,6 @@
 {
   "name": "nano-doc-updater",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Performs insert-updates of a couchdb document with configurable conflict resolution.",
   "author": "Chris Taylor <cntaylor@ca.ibm.com>",
   "license": "MIT",
