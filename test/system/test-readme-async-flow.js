@@ -10,48 +10,48 @@ test("after running through the 'async' flow from the README...", (t) => {
     var arbitraryDocId = "foo";
 
     resetTestDb()
-    .then((rawDb) => {
-        db = Promise.promisifyAll(rawDb);
+        .then((rawDb) => {
+            db = Promise.promisifyAll(rawDb);
 
-        var updater = nanoDocUpdater()
-        .db(rawDb);
+            var updater = nanoDocUpdater()
+                .db(rawDb);
 
-        return Promise.promisify(readmeAsyncFlow)(rawDb, updater, designDocId, arbitraryDocId);
-    })
-    .then(() => {
-        t.pass("...it at least succeeded");
-
-        return Promise.promisify(db.getAsync)(designDocId)
-        .then(() => {
-            t.fail("...the design doc inserted in the sample code still exists (i.e. was not deleted)");
+            return Promise.promisify(readmeAsyncFlow)(rawDb, updater, designDocId, arbitraryDocId);
         })
-        .catch(NotFoundError, () => {
-            t.pass("...the design doc inserted in the sample code was removed (as expected)");
-        });
-    })
-    .then(() => {
-        return Promise.promisify(db.getAsync)(arbitraryDocId)
         .then(() => {
-            t.fail("...the arbitrary doc inserted in the sample code still exists (i.e. was not deleted)");
-        })
-        .catch(NotFoundError, () => {
-            t.pass("...the arbitrary doc inserted in the sample code was removed (as expected)");
-        });
-    })
-    .catch((e) => {
-        if (e instanceof Error) {
-            t.comment(e.stack);
-            t.fail("...an error occurred");
-        } else {
-            t.comment(e.stack);
-            t.fail("...an error occurred");
-        }
+            t.pass("...it at least succeeded");
 
-        throw(e);
-    })
-    .finally(() => {
-        t.end();
-    });
+            return Promise.promisify(db.getAsync)(designDocId)
+                .then(() => {
+                    t.fail("...the design doc inserted in the sample code still exists (i.e. was not deleted)");
+                })
+                .catch(NotFoundError, () => {
+                    t.pass("...the design doc inserted in the sample code was removed (as expected)");
+                });
+        })
+        .then(() => {
+            return Promise.promisify(db.getAsync)(arbitraryDocId)
+                .then(() => {
+                    t.fail("...the arbitrary doc inserted in the sample code still exists (i.e. was not deleted)");
+                })
+                .catch(NotFoundError, () => {
+                    t.pass("...the arbitrary doc inserted in the sample code was removed (as expected)");
+                });
+        })
+        .catch((e) => {
+            if (e instanceof Error) {
+                t.comment(e.stack);
+                t.fail("...an error occurred");
+            } else {
+                t.comment(e.stack);
+                t.fail("...an error occurred");
+            }
+
+            throw(e);
+        })
+        .finally(() => {
+            t.end();
+        });
 });
 
 function readmeAsyncFlow(db, updater, designDocId, arbitraryDocId, callback) {
@@ -62,10 +62,10 @@ function readmeAsyncFlow(db, updater, designDocId, arbitraryDocId, callback) {
             language: "javascript",
             version: 1
         })
-        .shouldUpdate((existing, newDoc) => {
-            return !existing.version || existing.version < newDoc.version;
-        })
-        .updateJob(),
+            .shouldUpdate((existing, newDoc) => {
+                return !existing.version || existing.version < newDoc.version;
+            })
+            .updateJob(),
 
 
         // Update the design document with an even newer version,
@@ -80,7 +80,7 @@ function readmeAsyncFlow(db, updater, designDocId, arbitraryDocId, callback) {
                 }
             }
         })
-        .updateJob(),
+            .updateJob(),
 
 
         // Place that same document somewhere else in the db:
@@ -88,16 +88,16 @@ function readmeAsyncFlow(db, updater, designDocId, arbitraryDocId, callback) {
 
         // Delete that document:
         updater
-        .merge((existing) => {
-            existing._deleted = true;
-            return existing;
-        })
-        .updateJob(),
+            .merge((existing) => {
+                existing._deleted = true;
+                return existing;
+            })
+            .updateJob(),
 
         // Delete the design document:
         updater
-        .id(designDocId)
-        .updateJob()
+            .id(designDocId)
+            .updateJob()
     ], callback);
 }
 

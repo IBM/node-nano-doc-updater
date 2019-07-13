@@ -14,13 +14,13 @@ module.exports = function resetTestDB() {
         n = nano(process.env.DB);
         return Promise.promisify(n.db.destroy)("test");
     })
-    .catch(NanoNotFoundError, () => {})
-    .then(() => {
-        return Promise.promisify(n.db.create)("test");
-    })
-    .then(() => {
-        return n.use(DB_NAME);
-    });
+        .catch(NanoNotFoundError, () => {})
+        .then(() => {
+            return Promise.promisify(n.db.create)("test");
+        })
+        .then(() => {
+            return n.use(DB_NAME);
+        });
 };
 
 // Returns true iff the provided error is a Nano "Not Found" error.
