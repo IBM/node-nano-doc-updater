@@ -2,7 +2,7 @@
 
 # IBM Cloud DevOps Services - node-nano-doc-updater
 
-For more information on IBM Bluemix DevOps Services, see the [Bluemix Public IDS Experiment](https://new-console.ng.bluemix.net/dashboard/devops).
+[Click here](https://cloud.ibm.com/devops) for more information on IBM Cloud DevOps Services.
 
 This is one of hundreds of [IBM Open Source projects at GitHub](http://ibm.github.io).
 
