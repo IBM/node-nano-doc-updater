@@ -17,16 +17,17 @@
   "main": "index.js",
   "homepage": "https://github.com/IBM/node-nano-doc-updater/releases",
   "devDependencies": {
-    "async": "^2.1.2",
+    "async": "^3.1.0",
     "bluebird": "^3.5.5",
-    "eslint": "^3.7.1",
-    "nano": "^6.2.0",
+    "eslint": "^6.0.1",
+    "nano": "^8.1.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.2",
+    "tape": "^4.11.0",
     "tape-catch": "^1.0.6"
   },
   "scripts": {
     "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-spec",
-    "test-debug": "node --inspect --debug-brk node_modules/.bin/tape test/*/*.js"
+    "test-debug": "node --inspect --debug-brk node_modules/.bin/tape test/*/*.js",
+    "lint": "eslint ."
   }
 }

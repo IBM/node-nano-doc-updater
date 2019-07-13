@@ -12,7 +12,7 @@ test("after updating a document that already exists with no merge function...", 
     resetTestDb()
     .then((rawDb) => {
         db = Promise.promisifyAll(rawDb);
-        return db.insert(docId, docVersion1);
+        return db.insert({_id: docId, ...docVersion1});
     })
     .then(() => {
         var updater = nanoDocUpdater()
