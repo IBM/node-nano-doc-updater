@@ -20,13 +20,12 @@ test("after updating a document that already exists with no merge function...", 
         .newDoc(docVersion2)
         .id(docId);
 
-        return Promise.promisify(updater.update, updater)();
+        return Promise.promisify(updater.update.bind(updater))();
     })
     .then(() => {
         return db.getAsync(docId);
     })
-    .then((r) => {
-        var d = r[0];
+    .then((d) => {
 
         t.equal(d._id, "a", "...does the inserted document id match what we provided to NanoDocUpdater?");
 

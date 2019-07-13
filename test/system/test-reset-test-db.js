@@ -8,9 +8,7 @@ test("sanity - after wiping the DB...", (t) => {
         db = Promise.promisifyAll(db);
         return db.listAsync();
     })
-    .then((r) => {
-        var body = r[0];
-
+    .then((body) => {
         t.deepEquals(body.rows, [], "...is the db empty?");
     })
     .catch((e) => {

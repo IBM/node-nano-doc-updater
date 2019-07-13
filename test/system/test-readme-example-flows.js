@@ -41,16 +41,13 @@ test("while testing the scenario from the README...", (t) => {
             .merge(function (existing, newDoc) {
                 return newDoc;
             })
-            .update,
-            updater
+            .update.bind(updater)
         )();
     })
     .then(() => {
         return db.getAsync(designDocId);
     })
-    .then((r) => {
-        var doc = r[0];
-
+    .then((doc) => {
         delete doc._id;
         delete doc._rev;
 
@@ -62,16 +59,13 @@ test("while testing the scenario from the README...", (t) => {
         return Promise.promisify(
             updater
             .newDoc(designDoc2)
-            .update,
-            updater
+            .update.bind(updater)
         )();
     })
     .then(() => {
         return db.getAsync(designDocId);
     })
-    .then((r) => {
-        var doc = r[0];
-
+    .then((doc) => {
         delete doc._id;
         delete doc._rev;
 
@@ -85,16 +79,13 @@ test("while testing the scenario from the README...", (t) => {
             .id(otherDocId)
             .shouldUpdate(null)
             .merge(null)
-            .update,
-            updater
+            .update.bind(updater)
         )();
     })
     .then(() => {
         return db.getAsync(otherDocId);
     })
-    .then((r) => {
-        var doc = r[0];
-
+    .then((doc) => {
         delete doc._id;
         delete doc._rev;
 
@@ -108,8 +99,7 @@ test("while testing the scenario from the README...", (t) => {
                 existing._deleted = true;
                 return existing;
             })
-            .update,
-            updater
+            .update.bind(updater)
         )();
     })
     .then(() => {
@@ -131,8 +121,7 @@ test("while testing the scenario from the README...", (t) => {
                 existing._deleted = true;
                 return existing;
             })
-            .update,
-            updater
+            .update.bind(updater)
         )();
     })
     .then(() => {

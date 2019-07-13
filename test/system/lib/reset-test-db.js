@@ -8,7 +8,7 @@ module.exports = function resetTestDB() {
 
     return Promise.try(() => {
         if (!process.env.DB) {
-            throw new Error("DB envvar is undefinied");
+            throw new Error("DB envvar is undefined");
         }
 
         n = nano(process.env.DB);

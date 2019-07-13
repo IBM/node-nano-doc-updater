@@ -17,8 +17,7 @@ test("after execiting the steps in the Synopsis section" +
     .then(() => {
         return db.getAsync(designDocId);
     })
-    .then((r) => {
-        var doc = r[0];
+    .then((doc) => {
         delete doc._id;
         delete doc._rev;
 

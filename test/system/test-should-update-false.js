@@ -21,14 +21,12 @@ test("after updating a document that already exists with shouldUpdate=() => { re
         .newDoc(docVersion2)
         .id(docId);
 
-        return Promise.promisify(updater.update, updater)();
+        return Promise.promisify(updater.update.bind(updater))();
     })
     .then(() => {
         return db.getAsync(docId);
     })
-    .then((r) => {
-        var d = r[0];
-
+    .then((d) => {
         Object.getOwnPropertyNames(docVersion1).forEach((field) => {
             t.equal(
                 d[field],

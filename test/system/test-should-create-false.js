@@ -18,7 +18,7 @@ test("after updating a document that didn't already exist with shouldCreate(fals
         .shouldCreate(false)
         .id(docId);
 
-        return Promise.promisify(updater.update, updater)();
+        return Promise.promisify(updater.update.bind(updater))();
     })
     .then(() => {
         return db.getAsync(docId);

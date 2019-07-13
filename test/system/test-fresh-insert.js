@@ -17,14 +17,12 @@ test("after updating a document that didn't already exist...", (t) => {
         .newDoc(doc)
         .id(docId);
 
-        return Promise.promisify(updater.update, updater)();
+        return Promise.promisify(updater.update.bind(updater))();
     })
     .then(() => {
         return db.getAsync(docId);
     })
-    .then((r) => {
-        var d = r[0];
-
+    .then((d) => {
         t.equal(d._id, "a", "...does the inserted document id match what we provided to NanoDocUpdater?");
         t.equal(d.a, doc.a, "...does the field in the inserted document match what we provided to NanoDocUpdater?");
     })
