@@ -16,7 +16,8 @@
  *
  */
 
-var extend = require("./lib/extend"),
+var cloudant = require('@otc-core/cloudant'),
+    extend = require("./lib/extend"),
     omit = require("./lib/omit");
 
 module.exports = function () {
@@ -24,7 +25,9 @@ module.exports = function () {
 };
 
 function NanoDocUpdater () {
-    this._db = null;
+    this._cloudantService = null;
+    this._dbName = null;
+    this._isDesignDoc = null;
     this._existingDoc = null;
     this._newDoc = null;
     this._shouldUpdate = null;
@@ -34,7 +37,7 @@ function NanoDocUpdater () {
 }
 
 (function () {
-    ["db", "existingDoc", "newDoc", "id", "shouldUpdate", "shouldCreate", "merge"].forEach(function (f) {
+    ["cloudantService", "dbName", "isDesignDoc", "existingDoc", "newDoc", "id", "shouldUpdate", "shouldCreate", "merge"].forEach(function (f) {
         NanoDocUpdater.prototype[f] = function (newValue) {
             this["_" + f] = newValue;
             return this;
@@ -46,7 +49,9 @@ function NanoDocUpdater () {
             this._existingDoc,
             this._newDoc,
             this._id,
-            this._db,
+            this._cloudantService,
+            this._dbName,
+            this._isDesignDoc,
             this._shouldUpdate,
             this._shouldCreate,
             this._merge,
@@ -58,7 +63,9 @@ function NanoDocUpdater () {
         var existingDoc = this._existingDoc;
         var newDoc = this._newDoc;
         var id = this._id;
-        var db = this._db;
+        var cloudantService = this._cloudantService;
+        var dbName = this._dbName;
+        var isDesignDoc = this._isDesignDoc;
         var shouldUpdate = this._shouldUpdate;
         var shouldCreate = this._shouldCreate;
         var merge = this._merge;
@@ -68,7 +75,9 @@ function NanoDocUpdater () {
                 existingDoc,
                 newDoc,
                 id,
-                db,
+                cloudantService,
+                dbName,
+                isDesignDoc,
                 shouldUpdate,
                 shouldCreate,
                 merge,
@@ -94,7 +103,7 @@ function useNewVersion(existing, newVer) {
 /* Create-or-update a document: First fetch the existing revision, then
    insert a new one.  Optional f_ShouldUpdate and f_Merge functions
    control the specifics of merging. */
-function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback) {
+async function updateDocument(existingDoc, newDoc, id, cloudantService, dbName, isDesignDoc, f_ShouldUpdate, shouldCreate, f_Merge, callback) {
     if (!f_ShouldUpdate) {
         f_ShouldUpdate = always;
     }
@@ -105,35 +114,45 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
 
     // If we never grabbed the existing document from the DB, fetch it and try again.
     if (!existingDoc) {
-        return db.get(id, function (err, r) {
-            // If the fetch came back with nothing, attempt to do a fresh insert unless the user
-            // doesn't want documents to be created.
-            if (err && (err.error === "not_found")) {
-                if (!shouldCreate)
-                    // Don't create a document where one didn't exist, if the user so desires.
-                    return callback(null, null);
+    	var fn = isDesignDoc ? cloudant.getDesignDocument : cloudant.getDocument;
+        var r = await fn(cloudantService, dbName, id)
+            .catch(async function(err) {
+	            if (err.message === "not_found") {
+	                if (!shouldCreate) {
+                        // Don't create a document where one didn't exist, if the user so desires.
+                        return callback(null, null);
+                    }
 
-                return db.insert(newDoc, id, function (err, r) {
-                    // If someone beat us here, we should retry this whole operation.
-                    if (err && err.error === "conflict")
-                        return updateDocument(null, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback);
+			        fn = isDesignDoc ? cloudant.createDesignDocument : cloudant.createDocument;
+			        var r2 = await fn(cloudantService, dbName, id, newDoc)
+			            .catch(function(err) {
+			            	// If someone beat us here, we should retry this whole operation.
+				            if (err.message === "conflict") {
+				            	return updateDocument(null, newDoc, id, cloudantService, dbName, isDesignDoc, f_ShouldUpdate, shouldCreate, f_Merge, callback);
+			            	}
 
-                    // If anything else happened, we should bail.
-                    if (err)
-                        return callback("Could not fetch existing document: " + err.toString());
+			                // If anything else happened, we should bail.
+			                return callback("Could not fetch existing document: " + err.toString());
+			        	})
+			        if (!r2) {
+			            return; /* handled in the catch above */
+			        }
 
-                    // The insert worked.  We're done.
-                    return callback(null, extend({}, newDoc, {_rev: r.rev}));
-                });
-            }
+			        // The insert worked.  We're done.
+			        r2 = r2.result;
+			        return callback(null, extend({}, newDoc, {_rev: r2.rev}));
+		        }
 
-            // If the fetch came back with any other error, bail.
-            if (err)
-                return callback("Could not fetch existing document: " + err.toString());
+	            // If the fetch came back with any other error, bail.
+	            return callback("Could not fetch existing document: " + err.toString());
+            })
+        if (!r) {
+            return; /* handled in the catch above */
+        }
 
-            // We got the document.  Let's try the update again.
-            return updateDocument(r, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback);
-        });
+        // We got the document.  Let's try the update again.
+        r = r.result;
+        return updateDocument(r, newDoc, id, cloudantService, dbName, isDesignDoc, f_ShouldUpdate, shouldCreate, f_Merge, callback);
     }
 
     if (!f_ShouldUpdate(existingDoc, newDoc)) {
@@ -153,23 +172,24 @@ function updateDocument(existingDoc, newDoc, id, db, f_ShouldUpdate, shouldCreat
     mergedDoc = extend({}, mergedDoc, { _rev: existingDoc._rev });
 
     // The document exists, and is out of date.  We need to overwrite it.
-    db.insert(
-        mergedDoc,
-        id,
-        function (err, result) {
+    fn = isDesignDocument ? cloudant.updateDesignDocument : cloudant.updateDocument;
+    var result = await fn(cloudantService, dbName, id, mergedDoc)
+        .catch(function(err) {
             // If someone beat us here, we need to try the whole thing again.
-            if (err && err.error === "conflict")
-                return updateDocument(null, newDoc, id, db, f_ShouldUpdate, shouldCreate, f_Merge, callback);
+            if (err.message === "conflict") {
+                return updateDocument(null, newDoc, id, cloudantService, dbName, isDesignDoc, f_ShouldUpdate, shouldCreate, f_Merge, callback);
+            }
 
             // If anything else happened, bail.
-            if (err)
-                return callback("Could not update the document to the proposed version: " + err.toString());
+            return callback("Could not update the document to the proposed version: " + err.toString());
+        })
 
-            // Update the new document's _rev
-            mergedDoc._rev = result.rev;
-
-            // The replacement worked.  We're done.  Finally!
-            return callback(null, mergedDoc);
-        }
-    );
+    if (result) {
+	    // Update the new document's _rev
+	    result = result.result;
+	    mergedDoc._rev = result.rev;
+	
+	    // The replacement worked.  We're done.  Finally!
+	    return callback(null, mergedDoc);
+    }
 }
