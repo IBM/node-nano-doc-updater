@@ -139,7 +139,6 @@ async function updateDocument(existingDoc, newDoc, id, cloudantService, dbName, 
 			        }
 
 			        // The insert worked.  We're done.
-			        r2 = r2.result;
 			        return callback(null, extend({}, newDoc, {_rev: r2.rev}));
 		        }
 
@@ -151,7 +150,6 @@ async function updateDocument(existingDoc, newDoc, id, cloudantService, dbName, 
         }
 
         // We got the document.  Let's try the update again.
-        r = r.result;
         return updateDocument(r, newDoc, id, cloudantService, dbName, isDesignDoc, f_ShouldUpdate, shouldCreate, f_Merge, callback);
     }
 
@@ -186,7 +184,6 @@ async function updateDocument(existingDoc, newDoc, id, cloudantService, dbName, 
 
     if (result) {
 	    // Update the new document's _rev
-	    result = result.result;
 	    mergedDoc._rev = result.rev;
 	
 	    // The replacement worked.  We're done.  Finally!
