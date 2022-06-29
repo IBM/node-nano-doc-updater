@@ -1,6 +1,6 @@
 {
   "name": "nano-doc-updater",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Performs insert-updates of a couchdb document with configurable conflict resolution.",
   "author": "Chris Taylor <cntaylor@ca.ibm.com>",
   "license": "MIT",
@@ -17,16 +17,16 @@
   "main": "index.js",
   "homepage": "https://github.com/IBM/node-nano-doc-updater/releases",
   "devDependencies": {
-    "async": "^3.1.0",
-    "bluebird": "^3.5.5",
-    "eslint": "^6.0.1",
-    "nano": "^8.1.0",
-    "tap-spec": "^5.0.0",
-    "tape": "^4.11.0",
+    "async": "^3.2.4",
+    "bluebird": "^3.7.2",
+    "eslint": "^8.18.0",
+    "nano": "^10.0.0",
+    "tap-arc": "^0.3.4",
+    "tape": "^5.5.3",
     "tape-catch": "^1.0.6"
   },
   "scripts": {
-    "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-spec",
+    "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-arc",
     "test-debug": "node --inspect --debug-brk node_modules/.bin/tape test/*/*.js",
     "lint": "eslint ."
   }
