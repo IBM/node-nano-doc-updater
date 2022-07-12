@@ -32,5 +32,8 @@
     "test": "node_modules/.bin/tape test/*/*.js | node_modules/.bin/tap-arc",
     "test-debug": "node --inspect --debug-brk node_modules/.bin/tape test/*/*.js",
     "lint": "eslint ."
+  },
+  "dependencies": {
+    "@otc-core/cloudant": "^0.3.1"
   }
 }
